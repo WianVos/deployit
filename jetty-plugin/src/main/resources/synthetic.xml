@@ -1,0 +1,101 @@
+<?xml version="1.0" ?>
+<synthetic xmlns="http://www.xebialabs.com/deployit/synthetic">
+
+	<type type="jetty.Server" extends="generic.Container">
+		<property name="home" required="true" />
+		<property name="startScript" default="jetty/server/start-jetty.sh.ftl" hidden="true" />
+		<property name="stopScript" default="jetty/server/stop-jetty.sh.ftl" hidden="true" />
+    <method name="start" description="Start the Jetty server."/>
+    <method name="stop" description="Stop the Jetty server."/>
+	</type>
+  
+  <!-- Java EE Artifact -->
+	
+	<type type="jetty.WarModule" extends="generic.ExecutedScript" deployable-type="jee.War" container-type="jetty.Server">
+		<generate-deployable type="jetty.War" extends="jee.War" />
+		<property name="contextRoot" required="true" />
+    <property name="startingWeight" required="false" default="00" />
+		<property name="warTargetDirectory" default="${deployed.container.home}/webapps" hidden="true"/>
+		<property name="ctxTargetDirectory" default="${deployed.container.home}/contexts" hidden="true"/>
+		<property name="templateClasspathResources" kind="set_of_string" default="jetty/application/context.xml" hidden="true"/>
+		<property name="createScript" default="jetty/application/install-war.sh.ftl" hidden="true" />
+		<property name="destroyScript" default="jetty/application/uninstall-war.sh.ftl" hidden="true" />
+		<property name="restartRequired" default="true" kind="boolean" hidden="true" required="false" />
+	</type>
+  
+  <!-- Security mapping -->
+  
+	<type type="jetty.SecurityRoleMapping" extends="generic.ExecutedScript" deployable-type="jetty.SecurityRoleMappingSpec" container-type="jetty.Server">
+		<generate-deployable type="jetty.SecurityRoleMappingSpec" extends="generic.Resource" />
+		<property name="securityRole" kind='map_string_string' required="true" />
+		<property name="etcTargetDirectory" default="${deployed.container.home}/etc" hidden="true"/>
+		<property name="templateClasspathResources" kind="set_of_string" default="jetty/security/rolegroup.properties" hidden="true"/>
+		<property name="createScript" default="jetty/security/install-rolegroup.sh" hidden="true"/>
+		<property name="destroyScript" default="jetty/security/uninstall-rolegroup.sh" hidden="true" />
+		<property name="restartRequired" default="true" kind="boolean" hidden="true" required="false" />
+  </type>
+    
+  <!-- Datasource -->
+  
+  <type type="jetty.DB2Datasource" extends="generic.ExecutedScript" deployable-type="jetty.DB2DatasourceSpec" container-type="jetty.Server">
+		<generate-deployable type="jetty.DB2DatasourceSpec" extends="generic.Resource" />
+    <property name="jndiName" required="true" />
+    <property name="user" required="true" />
+    <property name="password" required="true" password="true" />
+    <property name="databasename" required="true" />
+    <property name="servername" required="true" />
+    <property name="portnumber" required="true" />
+    <property name="class" default="com.ibm.db2.jcc.DB2Driver" hidden="true" />    
+    <property name="defaultAutoCommit" default="true" kind="boolean" required="true" />
+    <property name="defaultTransactionIsolation" default="2" required="true" />
+    <property name="initialSize" default="0" required="true" />
+    <property name="maxActive" default="8" required="true" />
+    <property name="maxIdle" default="8" required="true" />
+    <property name="minIdle" default="0" required="true" />
+    <property name="maxWait" default="-1" required="true" />
+    <property name="driverType" default="4" hidden="true" />
+    <property name="progressiveStreaming" default="2" hidden="true" />
+    <property name="templateClasspathResources" kind="set_of_string" default="jetty/resource/datasource/datasource.xml" hidden="true"/>
+    <property name="createScript" default="jetty/resource/install-resource.sh" hidden="true"/>
+    <property name="destroyScript" default="jetty/resource/uninstall-resource.sh" hidden="true" />
+    <property name="restartRequired" default="true" kind="boolean" hidden="true" required="false" />
+  </type>
+  
+  <!-- MQ configuration -->
+  
+  <type type="jetty.WebsphereMQQueueConnectionFactory" extends="generic.ExecutedScript" deployable-type="jetty.MQQueueConnectionFactorySpec" container-type="jetty.Server">
+		<generate-deployable type="jetty.MQQueueConnectionFactorySpec" extends="generic.Resource" />
+  	<property name="jndiName" required="true" />
+    <property name="hostName" required="true" />
+    <property name="queueManager" required="true"/>
+    <property name="port" kind="integer" required="false"/>
+    <property name="channel" required="false"/>
+    <property name="CCDTURL" required="false"/>
+    <property name="customProperties" kind="map_string_string" required="false"/>
+    <!-- Hidden properties -->
+    <property name="class" default="com.ibm.mq.jms.MQQueueConnectionFactory" hidden="true"/>
+    <property name="transportType" default="1" hidden="true"/>
+    <property name="useConnectionPooling" default="true" kind="boolean" hidden="true"/>
+    <property name="clientReconnectOptions" default="16777216" kind="integer" hidden="true"/>
+    <!-- Deployment properties -->
+		<property name="templateClasspathResources" kind="set_of_string" default="jetty/resource/mq/mq-factory.xml" hidden="true"/>
+		<property name="createScript" default="jetty/resource/install-resource.sh" hidden="true"/>
+		<property name="destroyScript" default="jetty/resource/uninstall-resource.sh" hidden="true" />
+		<property name="restartRequired" default="true" kind="boolean" hidden="true" required="false" />
+  </type>	
+  
+  <type type="jetty.MQQueue" extends="generic.ExecutedScript" deployable-type="jetty.MQQueueSpec" container-type="jetty.Server">
+		<generate-deployable type="jetty.MQQueueSpec" extends="generic.Resource" />
+    <property name="jndiName" required="true" />
+    <property name="baseQueueName" required="true"/>
+    <property name="baseQueueManagerName" required="false"/>
+    <!-- Hidden properties -->
+    <property name="class" default="com.ibm.mq.jms.MQQueue" hidden="true"/>
+    <!-- Deployment properties -->
+		<property name="templateClasspathResources" kind="set_of_string" default="jetty/resource/mq/mq-queue.xml" hidden="true"/>
+		<property name="createScript" default="jetty/resource/install-resource.sh" hidden="true"/>
+		<property name="destroyScript" default="jetty/resource/uninstall-resource.sh" hidden="true" />
+		<property name="restartRequired" default="true" kind="boolean" hidden="true" required="false" />
+  </type>
+  
+</synthetic>

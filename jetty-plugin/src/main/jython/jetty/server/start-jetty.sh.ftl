@@ -1,0 +1,3 @@
+echo Starting Jetty ...
+rm --force ${container.home}/stopped_by_deployit
+sudo ${container.home}/start.sh
